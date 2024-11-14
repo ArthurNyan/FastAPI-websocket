@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Currency Observer</title>
+  </head>
+  <body>
+    <h1>Клиент ID: <span id="client-id"></span></h1>
+    <ul id="currency-updates"></ul>
+
+    <script>
+      const clientId = Math.random().toString(36).substr(2, 9);
+      document.getElementById("client-id").innerText = clientId;
+
+      const ws = new WebSocket(`ws://${location.host}/ws/${clientId}`);
+
+      ws.onopen = () => {
+        console.log("Соединение установлено");
+      };
+
+      ws.onmessage = (event) => {
+        console.log("Получены данные:", event.data);
+        const updates = JSON.parse(event.data);
+        const ul = document.getElementById("currency-updates");
+        ul.innerHTML = "";
+        for (const [key, value] of Object.entries(updates)) {
+          const li = document.createElement("li");
+          li.textContent = `${key}: ${value.Value} RUB`;
+          ul.appendChild(li);
+        }
+      };
+
+      ws.onerror = (error) => {
+        console.error("Ошибка веб-сокета:", error);
+      };
+
+      ws.onclose = () => {
+        console.log("Соединение закрыто.");
+      };
+    </script>
+  </body>
+</html>
